@@ -28,7 +28,7 @@ $ bash build.bash
 ## Set Path
 Put the following string to `.bash_profile`
 ```
-export SDB_PATH=/PATH/TO/sdbplg/bin/bin
+export SDB_PATH=/PATH/TO/sdbplg/bin
 ```
 
 ## Usage
