@@ -78,7 +78,7 @@ $ sdb 'run foo.exe'
 
 ### Shortcut
 
-Put the following to `$HOME/.sdb.rc
+Put the following to `$HOME/.sdb.rc`
 ```
 $ vim .sdb.rc
 
