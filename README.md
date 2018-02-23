@@ -12,7 +12,7 @@ sdbplg gives you compact viewing.
 
 ## ScreenShot
 
-![alt text](./pic/20180223.gif)
+![alt text](./pic/20180223-2.gif)
 
 ## Installing
 sdbplg requires mono and mono/sdb installed.
