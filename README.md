@@ -94,7 +94,7 @@ $ sdb 'run foo.exe'
 ```
 
 ### Display command
-You can display each modules with your favarit.
+You can display each modules with your favarite.
 ```
 (sdb) foo display
 please choise following
