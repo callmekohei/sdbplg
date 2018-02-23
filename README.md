@@ -6,6 +6,7 @@
 
 [mono/sdb](https://github.com/mono/sdb) plugins
 
+sdbplg gives you compact viewing.
 <br>
 <br>
 
