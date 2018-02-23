@@ -23,7 +23,7 @@ declare -a arr=(
     -r:./packages/System.Reactive.Linq/lib/net46/System.Reactive.Linq.dll
     -r:./packages/System.Reactive.Interfaces/lib/net45/System.Reactive.Interfaces.dll
     -r:./packages/System.Reactive.PlatformServices/lib/net46/System.Reactive.PlatformServices.dll
-    ./src/sdbplg.fsx
+    ./src/main.fsx
     --out:./bin/sdbplg.dll
 )
 
