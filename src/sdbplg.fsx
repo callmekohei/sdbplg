@@ -17,11 +17,11 @@ open System.Diagnostics
 open Mono.Debugger.Client
 open Mono.Debugging.Client
 
-#r @"./packages/System.Reactive.Core/lib/net46/System.Reactive.Core.dll"
-#r @"./packages/System.Reactive.Linq/lib/net46/System.Reactive.Linq.dll"
-#r @"./packages/System.Reactive.Interfaces/lib/net45/System.Reactive.Interfaces.dll"
-#r @"./packages/System.Reactive.PlatformServices/lib/net46/System.Reactive.PlatformServices.dll"
-#r @"./packages/FSharp.Control.Reactive/lib/net45/FSharp.Control.Reactive.dll"
+#r @"../packages/System.Reactive.Core/lib/net46/System.Reactive.Core.dll"
+#r @"../packages/System.Reactive.Linq/lib/net46/System.Reactive.Linq.dll"
+#r @"../packages/System.Reactive.Interfaces/lib/net45/System.Reactive.Interfaces.dll"
+#r @"../packages/System.Reactive.PlatformServices/lib/net46/System.Reactive.PlatformServices.dll"
+#r @"../packages/FSharp.Control.Reactive/lib/net45/FSharp.Control.Reactive.dll"
 open FSharp.Control.Reactive
 
 
@@ -34,24 +34,25 @@ type Generator()  =
         |> Observable.add ( fun ( flg:ref<bool> ) -> flg := false )
         |> ignore
 
-    member this.PrintOut( s:ref<string>
-                        , flg:ref<bool>
-                        , gatherOutputImpl: System.IO.MemoryStream * int -> string
-                        , ms:MemoryStream
-                        , prevLength:ref<int>
+    member this.PrintOut( str  : ref<string>
+                        , flg  : ref<bool>
+                        , pLen : ref<int>
+                        , f    : System.IO.MemoryStream * int -> string
+                        , ms   : System.IO.MemoryStream
                         ) =
 
-        if (!s).Contains("exited") || (!s).Contains("Hit breakpoint at") || (!s).Contains("suspended") then
+        let endMarks = ["exited";"Hit breakpoint at";"suspended"]
+
+        if endMarks |> List.exists( fun endMark -> (str.Value).Contains(endMark) ) then
             flg := false
         else
-            s := gatherOutputImpl(ms, 50)
-            if !prevLength <> (!s).Length then
+            str := f(ms, 50)
+            if pLen.Value <> (str.Value).Length then
                 m_Event.Trigger( flg )
-            prevLength := (!s).Length
+            pLen := (str.Value).Length
 
 
 module Foo =
-
 
     let localVariables () = async {
         try
@@ -310,14 +311,12 @@ module Foo =
 
     let gatherOutput f args = async {
 
-        // let throttle = new Throttle<ref<bool>>(1000, fun flg -> flg := false )
-
         try
 
             // Switch from StandardOut to MemoryStream
-            let ms = new MemoryStream()
-            let sw = new StreamWriter(ms)
-            let tw = TextWriter.Synchronized(sw)
+            use ms = new MemoryStream()
+            use sw = new StreamWriter(ms)
+            use tw = TextWriter.Synchronized(sw)
             sw.AutoFlush <- true
             Console.SetOut(tw)
 
@@ -327,15 +326,15 @@ module Foo =
             let s = ref ""
             let flg = ref true
             let prevLength = ref 0
-            while !flg do
-                ggg.PrintOut( s, flg, gatherOutputImpl, ms, prevLength )
+            while flg.Value do
+                ggg.PrintOut( s, flg, prevLength, gatherOutputImpl, ms )
 
             // Switch from MemoryStream to StandardOut
             let std = new StreamWriter(Console.OpenStandardOutput())
             std.AutoFlush <- true
             Console.SetOut(std)
 
-            return !s
+            return s.Value
 
         with e -> return e.Message
     }
