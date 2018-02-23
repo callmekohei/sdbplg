@@ -254,7 +254,7 @@ module SDBCommands =
                 Log.Error("No source information available")
 
 
-    let run (args:string) = async {
+    let run (args:string) =
 
         if (Debugger.State <> State.Exited) then
             Log.Error("an inferior process is already being debugged")
@@ -284,41 +284,36 @@ module SDBCommands =
             with e ->
                 Log.Error("could not open file '{0}':", args)
                 Log.Error( e.Message )
-    }
 
 
-    let stepOver() = async {
+    let stepOver() =
         try
             if (Debugger.State = State.Suspended) then
                 Debugger.StepOverLine()
             else
                 Log.Error("No suspended inferior process")
         with e -> Log.Info(e.Message)
-    }
 
-    let stepInto() = async {
+    let stepInto() =
         try
             if (Debugger.State = State.Suspended) then
                 Debugger.StepIntoLine()
             else
                 Log.Error("No suspended inferior process")
         with e -> Log.Info(e.Message)
-    }
 
-    let stepOut() = async {
+    let stepOut() =
         try
             if (Debugger.State = State.Suspended) then
                 Debugger.StepOutOfMethod()
             else
                 Log.Error("No suspended inferior process")
         with e -> Log.Info(e.Message)
-    }
 
-    let Continue() = async {
+    let Continue() =
         try
             if (Debugger.State = State.Exited) then
                 Log.Error("No inferior process")
             else
                 Debugger.Continue()
         with e -> Log.Info(e.Message)
-    }

@@ -82,7 +82,7 @@ module Foo =
         sr.ReadToEnd()
 
 
-    let gatherOutput f args = async {
+    let gatherOutput f args =
 
         try
 
@@ -93,7 +93,7 @@ module Foo =
             sw.AutoFlush <- true
             Console.SetOut(tw)
 
-            do! f args
+            f args
 
             // read from MemoryStream
             let s = ref ""
@@ -107,15 +107,14 @@ module Foo =
             std.AutoFlush <- true
             Console.SetOut(std)
 
-            return s.Value
+            s.Value
 
-        with e -> return e.Message
-    }
+        with e -> e.Message
 
 
     // command foo
 
-    let func args s = async {
+    let func args s =
 
         System.Console.Clear()
 
@@ -130,7 +129,7 @@ module Foo =
         watches()        |> Async.RunSynchronously
 
         Log.Info(line01)
-        backTrace()         |> Async.RunSynchronously
+        backTrace() |> Async.RunSynchronously
 
         Log.Info(line02)
         Source(args)
@@ -143,7 +142,6 @@ module Foo =
         System.Threading.Thread.Sleep 5
         ()
 
-    }
 
     type MyRun() =
         inherit Command()
@@ -151,7 +149,7 @@ module Foo =
         override __.Summary       = ""
         override __.Syntax        = ""
         override __.Help          = ""
-        override __.Process(args) = func args (gatherOutput run args |> Async.RunSynchronously) |> Async.RunSynchronously
+        override __.Process(args) = func args ( gatherOutput run args )
 
     type MyStepOver() =
         inherit Command()
@@ -159,7 +157,7 @@ module Foo =
         override __.Summary       = ""
         override __.Syntax        = ""
         override __.Help          = ""
-        override __.Process(args) = func args (gatherOutput stepOver () |> Async.RunSynchronously) |> Async.RunSynchronously
+        override __.Process(args) = func args ( gatherOutput stepOver () )
 
     type MyStepInto() =
         inherit Command()
@@ -167,7 +165,7 @@ module Foo =
         override __.Summary       = ""
         override __.Syntax        = ""
         override __.Help          = ""
-        override __.Process(args) = func args (gatherOutput stepInto () |> Async.RunSynchronously) |> Async.RunSynchronously
+        override __.Process(args) = func args ( gatherOutput stepInto () )
 
     type MyStepOut() =
         inherit Command()
@@ -175,7 +173,7 @@ module Foo =
         override __.Summary       = ""
         override __.Syntax        = ""
         override __.Help          = ""
-        override __.Process(args) = func args (gatherOutput stepOut () |> Async.RunSynchronously) |> Async.RunSynchronously
+        override __.Process(args) = func args ( gatherOutput stepOut () )
 
     type MyContinue() =
         inherit Command()
@@ -183,7 +181,7 @@ module Foo =
         override __.Summary       = ""
         override __.Syntax        = ""
         override __.Help          = ""
-        override __.Process(args) = func args (gatherOutput Continue () |> Async.RunSynchronously) |> Async.RunSynchronously
+        override __.Process(args) = func args ( gatherOutput Continue () )
 
     [<Sealed; Command>]
     type MyCommand() =
@@ -201,7 +199,7 @@ module Foo =
 
     // command bar
 
-    let func_bar args s = async {
+    let func_bar args s =
 
         System.Console.Clear()
 
@@ -216,10 +214,10 @@ module Foo =
         watches()        |> Async.RunSynchronously
 
         Log.Info(line01)
-        backTrace()         |> Async.RunSynchronously
+        backTrace() |> Async.RunSynchronously
 
         Log.Info(line02)
-        Assembly()       |> Async.RunSynchronously
+        Assembly() |> Async.RunSynchronously
 
         Log.Info(line03)
         Log.Info(s)
@@ -229,7 +227,6 @@ module Foo =
         System.Threading.Thread.Sleep 5
         ()
 
-    }
 
     type MyRunBar() =
         inherit Command()
@@ -237,7 +234,7 @@ module Foo =
         override __.Summary       = ""
         override __.Syntax        = ""
         override __.Help          = ""
-        override __.Process(args) = func_bar args (gatherOutput run args |> Async.RunSynchronously) |> Async.RunSynchronously
+        override __.Process(args) = func_bar args (gatherOutput run args )
 
     type MyStepOverBar() =
         inherit Command()
@@ -245,7 +242,7 @@ module Foo =
         override __.Summary       = ""
         override __.Syntax        = ""
         override __.Help          = ""
-        override __.Process(args) = func_bar args (gatherOutput stepOver () |> Async.RunSynchronously) |> Async.RunSynchronously
+        override __.Process(args) = func_bar args (gatherOutput stepOver () )
 
     type MyStepIntoBar() =
         inherit Command()
@@ -253,7 +250,7 @@ module Foo =
         override __.Summary       = ""
         override __.Syntax        = ""
         override __.Help          = ""
-        override __.Process(args) = func_bar args (gatherOutput stepInto () |> Async.RunSynchronously) |> Async.RunSynchronously
+        override __.Process(args) = func_bar args (gatherOutput stepInto () )
 
     type MyStepOutBar() =
         inherit Command()
@@ -261,7 +258,7 @@ module Foo =
         override __.Summary       = ""
         override __.Syntax        = ""
         override __.Help          = ""
-        override __.Process(args) = func_bar args (gatherOutput stepOut () |> Async.RunSynchronously) |> Async.RunSynchronously
+        override __.Process(args) = func_bar args (gatherOutput stepOut () )
 
     type MyContinueBar() =
         inherit Command()
@@ -269,7 +266,7 @@ module Foo =
         override __.Summary       = ""
         override __.Syntax        = ""
         override __.Help          = ""
-        override __.Process(args) = func_bar args (gatherOutput Continue () |> Async.RunSynchronously) |> Async.RunSynchronously
+        override __.Process(args) = func_bar args (gatherOutput Continue () )
 
     [<Sealed; Command>]
     type MyCommandBar() =
