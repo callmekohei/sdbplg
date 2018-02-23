@@ -13,6 +13,7 @@ open System
 open System.IO
 open System.Text
 open System.Diagnostics
+open System.Collections.Concurrent
 
 #r "/usr/local/lib/sdb/sdb.exe"
 #r "/usr/local/lib/sdb/Mono.Debugging.dll"
@@ -59,7 +60,6 @@ module Foo =
 
     let ggg = Generator()
 
-
     let gatherOutputImpl(ms:MemoryStream, time_ms:int) =
 
         let sr = new System.IO.StreamReader(ms)
@@ -85,7 +85,6 @@ module Foo =
     let gatherOutput f args =
 
         try
-
             // Switch from StandardOut to MemoryStream
             use ms = new MemoryStream()
             use sw = new StreamWriter(ms)
@@ -112,36 +111,50 @@ module Foo =
         with e -> e.Message
 
 
-    // command foo
+    type DisplayItems = EXP | BT | SRC | OP | ASM
 
-    let func args s =
+    let cq = new ConcurrentQueue<DisplayItems>()
 
-        System.Console.Clear()
-
-        let width = System.Console.WindowWidth
-        let line00 = Color.DarkBlue + "─── " + Color.DarkYellow + "Expressions "     + Color.DarkBlue  + String.replicate (width - 4 - 12) "─"
-        let line01 = Color.DarkBlue + "─── " + Color.DarkYellow + "BackTrace "       + Color.DarkBlue  + String.replicate (width - 4 - 10) "─"
-        let line02 = Color.DarkBlue + "─── " + Color.DarkYellow + "Source "          + Color.DarkBlue  + String.replicate (width - 4 -  9) "─"
-        let line03 = Color.DarkBlue + "─── " + Color.DarkYellow + "Output/messages " + Color.DarkBlue  + String.replicate (width - 4 - 16) "─"
-
-        Log.Info(line00)
+    let expressions_ (width) =
+        Log.Info( Color.DarkBlue + "─── " + Color.DarkYellow + "Expressions "     + Color.DarkBlue  + String.replicate (width - 4 - 12) "─" )
         localVariables() |> Async.RunSynchronously
         watches()        |> Async.RunSynchronously
 
-        Log.Info(line01)
+    let backTrace_ (width) =
+        Log.Info( Color.DarkBlue + "─── " + Color.DarkYellow + "BackTrace "       + Color.DarkBlue  + String.replicate (width - 4 - 10) "─" )
         backTrace() |> Async.RunSynchronously
 
-        Log.Info(line02)
+    let source_ (width, args) =
+        Log.Info( Color.DarkBlue + "─── " + Color.DarkYellow + "Source "          + Color.DarkBlue  + String.replicate (width - 4 -  9) "─" )
         Source(args)
 
-        Log.Info(line03)
+    let assembly_ (width) =
+        Log.Info( Color.DarkBlue + "─── " + Color.DarkYellow + "Assembly "        + Color.DarkBlue  + String.replicate (width - 4 -  9) "─" )
+        Assembly() |> Async.RunSynchronously
+
+    let output_ (width, s) =
+        Log.Info( Color.DarkBlue + "─── " + Color.DarkYellow + "Output/messages " + Color.DarkBlue  + String.replicate (width - 4 - 16) "─" )
         Log.Info(s)
 
-        // enable to echoback
-        Process.Start("stty","echo") |> ignore
-        System.Threading.Thread.Sleep 5
-        ()
+    let func args s =
+        System.Console.Clear()
+        let width = System.Console.WindowWidth
 
+        if cq.Count = 0 then
+            [EXP;BT;SRC;OP] |> List.iter( fun di -> cq.Enqueue(di) )
+
+        cq.ToArray()
+        |> Array.iter( fun x ->
+                    match x with
+                    | EXP -> expressions_(width)
+                    | BT  -> backTrace_(width)
+                    | SRC -> source_(width, s)
+                    | ASM -> assembly_(width)
+                    | OP  -> output_(width, s) )
+
+        // enable to echoback
+        Process.Start("stty","echo")    |> ignore
+        System.Threading.Thread.Sleep 5 |> ignore
 
     type MyRun() =
         inherit Command()
@@ -183,6 +196,61 @@ module Foo =
         override __.Help          = ""
         override __.Process(args) = func args ( gatherOutput Continue () )
 
+    type MyDisplay() =
+        inherit Command()
+        override __.Names         = [|"display"|]
+        override __.Summary       = ""
+        override __.Syntax        = ""
+        override __.Help          = ""
+        override __.Process(args) =
+
+            let keywords = ["expressions";"backtrace";"source";"assembly";"output"]
+
+            if cq.Count <> 0 then
+                cq.ToArray()
+                |> Array.map( fun x ->
+                            match x with
+                            | DisplayItems.EXP -> "expressions"
+                            | DisplayItems.BT  -> "backtrace"
+                            | DisplayItems.SRC -> "source"
+                            | DisplayItems.ASM -> "assembly"
+                            | DisplayItems.OP  -> "output" )
+                |> Array.reduce( fun a b -> a + " " + b )
+                |> fun s -> printfn "your display orders: %s" s
+
+            if args = String.Empty then
+                printfn "please choise following"
+                keywords
+                |> List.reduce( fun a b -> a + " " + b )
+                |> fun s -> printfn "%s" s
+
+            else
+                cq.Clear()
+
+                args.Split(' ')
+                |> Array.iter( fun s ->
+                    if keywords |> List.exists( fun keyword -> keyword = s.ToLower() ) then
+                        match s.ToLower() with
+                        | "expressions" -> cq.Enqueue( DisplayItems.EXP )
+                        | "backtrace"   -> cq.Enqueue( DisplayItems.BT  )
+                        | "source"      -> cq.Enqueue( DisplayItems.SRC )
+                        | "assembly"    -> cq.Enqueue( DisplayItems.ASM )
+                        | "output"      -> cq.Enqueue( DisplayItems.OP  )
+                        | _ -> ()
+                )
+
+                if cq.Count <> 0 then
+                    cq.ToArray()
+                    |> Array.map( fun x ->
+                                match x with
+                                | DisplayItems.EXP -> "expressions"
+                                | DisplayItems.BT  -> "backtrace"
+                                | DisplayItems.SRC -> "source"
+                                | DisplayItems.ASM -> "assembly"
+                                | DisplayItems.OP  -> "output" )
+                    |> Array.reduce( fun a b -> a + " " +  b )
+                    |> fun s -> printfn "your display orders: %s" s
+
     [<Sealed; Command>]
     type MyCommand() =
         inherit MultiCommand()
@@ -191,92 +259,8 @@ module Foo =
         do base.AddCommand<MyStepInto>()
         do base.AddCommand<MyStepOut>()
         do base.AddCommand<MyContinue>()
+        do base.AddCommand<MyDisplay>()
         override this.Names   = [|"foo"|]
-        override this.Summary = ""
-        override this.Syntax  = ""
-        override this.Help    = ""
-
-
-    // command bar
-
-    let func_bar args s =
-
-        System.Console.Clear()
-
-        let width = System.Console.WindowWidth
-        let line00 = Color.DarkBlue + "─── " + Color.DarkYellow + "Expressions "     + Color.DarkBlue  + String.replicate (width - 4 - 12) "─"
-        let line01 = Color.DarkBlue + "─── " + Color.DarkYellow + "BackTrace "       + Color.DarkBlue  + String.replicate (width - 4 - 10) "─"
-        let line02 = Color.DarkBlue + "─── " + Color.DarkYellow + "Assembly "        + Color.DarkBlue  + String.replicate (width - 4 -  9) "─"
-        let line03 = Color.DarkBlue + "─── " + Color.DarkYellow + "Output/messages " + Color.DarkBlue  + String.replicate (width - 4 - 16) "─"
-
-        Log.Info(line00)
-        localVariables() |> Async.RunSynchronously
-        watches()        |> Async.RunSynchronously
-
-        Log.Info(line01)
-        backTrace() |> Async.RunSynchronously
-
-        Log.Info(line02)
-        Assembly() |> Async.RunSynchronously
-
-        Log.Info(line03)
-        Log.Info(s)
-
-        // enable to echoback
-        Process.Start("stty","echo") |> ignore
-        System.Threading.Thread.Sleep 5
-        ()
-
-
-    type MyRunBar() =
-        inherit Command()
-        override __.Names         = [|"run"|]
-        override __.Summary       = ""
-        override __.Syntax        = ""
-        override __.Help          = ""
-        override __.Process(args) = func_bar args (gatherOutput run args )
-
-    type MyStepOverBar() =
-        inherit Command()
-        override __.Names         = [|"stepover"|]
-        override __.Summary       = ""
-        override __.Syntax        = ""
-        override __.Help          = ""
-        override __.Process(args) = func_bar args (gatherOutput stepOver () )
-
-    type MyStepIntoBar() =
-        inherit Command()
-        override __.Names         = [|"stepinto"|]
-        override __.Summary       = ""
-        override __.Syntax        = ""
-        override __.Help          = ""
-        override __.Process(args) = func_bar args (gatherOutput stepInto () )
-
-    type MyStepOutBar() =
-        inherit Command()
-        override __.Names         = [|"stepout"|]
-        override __.Summary       = ""
-        override __.Syntax        = ""
-        override __.Help          = ""
-        override __.Process(args) = func_bar args (gatherOutput stepOut () )
-
-    type MyContinueBar() =
-        inherit Command()
-        override __.Names         = [|"continue"|]
-        override __.Summary       = ""
-        override __.Syntax        = ""
-        override __.Help          = ""
-        override __.Process(args) = func_bar args (gatherOutput Continue () )
-
-    [<Sealed; Command>]
-    type MyCommandBar() =
-        inherit MultiCommand()
-        do base.AddCommand<MyRunBar>()
-        do base.AddCommand<MyStepOverBar>()
-        do base.AddCommand<MyStepIntoBar>()
-        do base.AddCommand<MyStepOutBar>()
-        do base.AddCommand<MyContinueBar>()
-        override this.Names   = [|"bar"|]
         override this.Summary = ""
         override this.Syntax  = ""
         override this.Help    = ""

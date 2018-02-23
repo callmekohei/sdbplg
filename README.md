@@ -76,21 +76,32 @@ $ sdb 'run foo.exe'
 (sdb) quit
 ```
 
+### Display command
+You can display each modules with your favarit.
+```
+(sdb) foo display
+please choise following
+expressions backtrace source assembly output
+
+(sdb) foo display source output
+
+─── Source ──────────────────────────────────────────────
+No active stack frame
+─── Output/messages ─────────────────────────────────────
+no program path given (and no previous program to re-run)
+```
+
 ### Shortcut
 
 Put the following to `$HOME/.sdb.rc`
 ```
 $ vim .sdb.rc
 
-alias add n foo stepover
-alias add i foo stepinto
-alias add u foo stepout
-alias add c foo stepcontinue
-alias add r foo run
-
-alias add nn bar stepover
-alias add ii bar stepinto
-alias add uu bar stepout
-alias add cc bar stepcontinue
-alias add rr bar run
+alias add r       foo run
+alias add n       foo stepover
+alias add i       foo stepinto
+alias add u       foo stepout
+alias add c       foo stepcontinue
+alias add display foo display
+r
 ```
