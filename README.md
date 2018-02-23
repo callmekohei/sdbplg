@@ -87,4 +87,10 @@ alias add i foo stepinto
 alias add u foo stepout
 alias add c foo stepcontinue
 alias add r foo run
+
+alias add nn bar stepover
+alias add ii bar stepinto
+alias add uu bar stepout
+alias add cc bar stepcontinue
+alias add rr bar run
 ```
