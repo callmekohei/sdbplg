@@ -1,0 +1,7 @@
+alias add r       foo run
+alias add n       foo stepover
+alias add i       foo stepinto
+alias add u       foo stepout
+alias add c       foo stepcontinue
+alias add display foo display
+r
