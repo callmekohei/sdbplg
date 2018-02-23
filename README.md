@@ -32,6 +32,22 @@ Put the following string to `.bash_profile`
 export SDB_PATH=/PATH/TO/sdbplg/bin
 ```
 
+
+## Set Shortcut key
+
+Put the following file to `$HOME/.sdb.rc`
+```
+$ vim .sdb.rc
+
+alias add r       foo run
+alias add n       foo stepover
+alias add i       foo stepinto
+alias add u       foo stepout
+alias add c       foo stepcontinue
+alias add display foo display
+r
+```
+
 ## Usage
 ```
 // create foo.fsx
@@ -90,19 +106,4 @@ expressions backtrace source assembly output
 No active stack frame
 ─── Output/messages ─────────────────────────────────────
 no program path given (and no previous program to re-run)
-```
-
-### Shortcut
-
-Put the following to `$HOME/.sdb.rc`
-```
-$ vim .sdb.rc
-
-alias add r       foo run
-alias add n       foo stepover
-alias add i       foo stepinto
-alias add u       foo stepout
-alias add c       foo stepcontinue
-alias add display foo display
-r
 ```
