@@ -1,7 +1,7 @@
 [![MIT-LICENSE](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/callmekohei/tigaDebugger/blob/master/LICENSE)
 [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/vim-jp/reading-vimrc)
 
-![alt text](./pic/20180223-2.gif)
+![alt text](./pic/foo.gif)
 
 # sdbplg
 
