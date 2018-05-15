@@ -21,11 +21,12 @@ open System.Collections.Concurrent
 open Mono.Debugger.Client
 open Mono.Debugging.Client
 
-#r @"../packages/System.Reactive.Core/lib/net46/System.Reactive.Core.dll"
-#r @"../packages/System.Reactive.Linq/lib/net46/System.Reactive.Linq.dll"
-#r @"../packages/System.Reactive.Interfaces/lib/net45/System.Reactive.Interfaces.dll"
-#r @"../packages/System.Reactive.PlatformServices/lib/net46/System.Reactive.PlatformServices.dll"
-#r @"../packages/FSharp.Control.Reactive/lib/net45/FSharp.Control.Reactive.dll"
+#load "../.paket/load/net471/main.group.fsx"
+// #r @"../packages/System.Reactive.Core/lib/net46/System.Reactive.Core.dll"
+// #r @"../packages/System.Reactive.Linq/lib/net46/System.Reactive.Linq.dll"
+// #r @"../packages/System.Reactive.Interfaces/lib/net45/System.Reactive.Interfaces.dll"
+// #r @"../packages/System.Reactive.PlatformServices/lib/net46/System.Reactive.PlatformServices.dll"
+// #r @"../packages/FSharp.Control.Reactive/lib/net45/FSharp.Control.Reactive.dll"
 open FSharp.Control.Reactive
 
 

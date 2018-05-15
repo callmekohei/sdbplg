@@ -1,6 +1,17 @@
-bin
-packages
+!.gitignore
+.paket
+!.sdb.rc
+!LICENSE
+!README.md
+bin/
+!build.bash
+packages/
 paket-files
+!paket.dependencies
+!paket.lock
+!pic/
+!src
+
 
 
 
