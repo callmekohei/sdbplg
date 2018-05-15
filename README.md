@@ -1,35 +1,27 @@
 [![MIT-LICENSE](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/callmekohei/tigaDebugger/blob/master/LICENSE)
-
 [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/vim-jp/reading-vimrc)
-
-# sdbplg
-
-[mono/sdb](https://github.com/mono/sdb) plugins
-
-sdbplg gives you compact viewing.
-<br>
-<br>
-
-## ScreenShot
 
 ![alt text](./pic/20180223-2.gif)
 
-## Installing
-sdbplg requires mono and mono/sdb installed.
+# sdbplg
+
+`sdbplg` is [sdb](https://github.com/mono/sdb) plugins.  
+`sdbplg` provides compact debug viewing.
+
+## Install and build
+
+sdbplg requires [mono](https://github.com/mono/mono) and [sdb](https://github.com/mono/sdb) installed.
 
 ```
 $ git clone --depth 1 https://github.com/callmekohei/sdbplg
-```
-
-## About Compile
-```
+$ cd ./sdbplg/
 $ bash build.bash
 ```
 
 ## Set Path
 Put the following string to `.bash_profile`
 ```
-export SDB_PATH=/PATH/TO/sdbplg/bin
+export SDB_PATH=/PATH/TO/sdbplg/bin/
 ```
 
 
@@ -39,13 +31,13 @@ Put the following file to `$HOME/.sdb.rc`
 ```
 $ vim .sdb.rc
 
-alias add r       foo run
-alias add n       foo stepover
-alias add i       foo stepinto
-alias add u       foo stepout
-alias add c       foo stepcontinue
-alias add display foo display
-r
+    alias add r       foo run
+    alias add n       foo stepover
+    alias add i       foo stepinto
+    alias add u       foo stepout
+    alias add c       foo stepcontinue
+    alias add display foo display
+    r
 ```
 
 ## Usage
