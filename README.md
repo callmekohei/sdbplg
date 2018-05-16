@@ -8,9 +8,12 @@
 `sdbplg` is [sdb](https://github.com/mono/sdb) plugins.  
 `sdbplg` provides compact debug viewing.
 
-## Install and build
+## Requires
 
-sdbplg requires [mono](https://github.com/mono/mono) and [sdb](https://github.com/mono/sdb) installed.
+[mono](https://github.com/mono/mono)  
+[sdb](https://github.com/mono/sdb)
+
+## Install and build
 
 ```
 $ git clone --depth 1 https://github.com/callmekohei/sdbplg
@@ -23,7 +26,6 @@ Put the following string to `.bash_profile`
 ```
 export SDB_PATH=/PATH/TO/sdbplg/bin/
 ```
-
 
 ## Set Shortcut key
 
@@ -86,7 +88,11 @@ $ sdb 'run foo.exe'
 ```
 
 ### Display command
-You can display each modules with your favarite.
+
+`sdbplg` has five modules ( expressions, backtrace, source, assembly and output ).  
+You can display each modules with your favarite.  
+If you like to display `source, output`, do following:
+
 ```
 (sdb) foo display
 please choise following
