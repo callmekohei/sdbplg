@@ -14,7 +14,7 @@ Lib_PATH=./.paket/load/net471/main.group.fsx
 # see also
 # Getting Started with Paket > Manual setup
 # https://fsprojects.github.io/Paket/getting-started.html#Manual-setup
-download_paket_bootstrapper () {
+function download_paket_bootstrapper () {
 
     if ! type jq >/dev/null 2>&1 ; then
         echo 'Please install jq'
@@ -31,7 +31,7 @@ download_paket_bootstrapper () {
     mv .paket/paket.bootstrapper.exe .paket/paket.exe
 }
 
-install_lib () {
+function install_lib () {
 
     local foo="
         generate_load_scripts: true
@@ -54,7 +54,7 @@ install_lib () {
 }
 
 
-create_exe_file () {
+function create_exe_file () {
     declare -a local arr=(
         "${FSX_PATH}"
         --target:library
@@ -67,7 +67,7 @@ create_exe_file () {
 }
 
 
-arrange_text () {
+function arrange_text () {
     local line
     while read -r line
     do
@@ -80,7 +80,7 @@ arrange_text () {
 }
 
 
-copy_dll_to_bin_folder () {
+function copy_dll_to_bin_folder () {
     local line
     while read -r line
     do
