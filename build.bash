@@ -8,7 +8,6 @@
 
 # fit your file path
 FSX_PATH=./src/main.fsx
-Lib_PATH=./.paket/load/net471/main.group.fsx
 
 
 # see also
@@ -31,27 +30,6 @@ function download_paket_bootstrapper () {
     mv .paket/paket.bootstrapper.exe .paket/paket.exe
 }
 
-function install_lib () {
-
-    local foo="
-        generate_load_scripts: true
-        source https://www.nuget.org/api/v2
-        nuget FSharp.Control.Reactive
-    "
-
-    if ! type paket >/dev/null 2>&1 ; then
-        download_paket_bootstrapper
-        mono ./.paket/paket.exe init
-        echo "${foo}" > ./paket.dependencies
-        mono ./.paket/paket.exe install
-    else
-        if [ ! -f ./packages/ ] ; then
-            paket init
-            echo "${foo}" > ./paket.dependencies
-            paket install
-        fi
-    fi
-}
 
 
 function create_exe_file () {
@@ -67,35 +45,15 @@ function create_exe_file () {
 }
 
 
-function arrange_text () {
-    local line
-    while read -r line
-    do
-        echo "${line}" \
-        | sed -e 's/#r //g' \
-              -e 's/"//g'   \
-        | grep --color=never -e "^\." \
-        | sed -e 's|^.*packages|\./packages|g'
-    done
-}
 
 
-function copy_dll_to_bin_folder () {
-    local line
-    while read -r line
-    do
-        cp "${line}" ./bin/
-    done
-}
 
 if [ -e ./bin/ ] ; then
     echo 'do nothing!'
 else
     mkdir ./bin/
-    install_lib
     if [ "$?" = 0 ] ; then
         create_exe_file
-        cat "${Lib_PATH}" | arrange_text | copy_dll_to_bin_folder
     fi
 fi
 

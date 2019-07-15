@@ -21,45 +21,30 @@ open System.Collections.Concurrent
 open Mono.Debugger.Client
 open Mono.Debugging.Client
 
-#load "../.paket/load/net471/main.group.fsx"
-// #r @"../packages/System.Reactive.Core/lib/net46/System.Reactive.Core.dll"
-// #r @"../packages/System.Reactive.Linq/lib/net46/System.Reactive.Linq.dll"
-// #r @"../packages/System.Reactive.Interfaces/lib/net45/System.Reactive.Interfaces.dll"
-// #r @"../packages/System.Reactive.PlatformServices/lib/net46/System.Reactive.PlatformServices.dll"
-// #r @"../packages/FSharp.Control.Reactive/lib/net45/FSharp.Control.Reactive.dll"
-open FSharp.Control.Reactive
-
-
-type Generator()  =
-    let m_Event = new Event<_>()
-
-    do
-        m_Event.Publish
-        |> Observable.throttle ( System.TimeSpan.FromMilliseconds(1000.) )
-        |> Observable.add ( fun ( flg:ref<bool> ) -> flg := false )
-        |> ignore
-
-    member this.PrintOut( str  : ref<string>
-                        , flg  : ref<bool>
-                        , pLen : ref<int>
-                        , f    : System.IO.MemoryStream * int -> string
-                        , ms   : System.IO.MemoryStream
-                        ) =
-
-        let endMarks = ["exited";"Hit breakpoint at";"suspended"]
-
-        if endMarks |> List.exists( fun endMark -> (str.Value).Contains(endMark) ) then
-            flg := false
-        else
-            str := f(ms, 50)
-            if pLen.Value <> (str.Value).Length then
-                m_Event.Trigger( flg )
-            pLen := (str.Value).Length
-
 
 module Foo =
 
-    let ggg = Generator()
+    let readFromMemoryStream( str: ref<string>
+                            , f  : System.IO.MemoryStream * int -> string
+                            , ms : System.IO.MemoryStream
+                            ) : unit =
+
+        let endMarks = ["exited";"Hit breakpoint at";"suspended"]
+        let flg = ref true
+        let previousStringLength = ref 0
+
+        let tc = System.Environment.TickCount
+        while flg.Value do
+            if System.Environment.TickCount - tc > 3000 then  /// 10s
+                flg := false
+            elif endMarks |> List.exists( fun endMark -> (str.Value).Contains(endMark) ) then
+                flg := false
+            else
+                str := f(ms, 50)
+                if previousStringLength.Value <> (str.Value).Length then
+                    System.Threading.Thread.Sleep 100
+                previousStringLength := (str.Value).Length
+
 
     let gatherOutputImpl(ms:MemoryStream, time_ms:int) =
 
@@ -95,12 +80,9 @@ module Foo =
 
             f args
 
-            // read from MemoryStream
+            // Read from MemoryStream
             let s = ref ""
-            let flg = ref true
-            let prevLength = ref 0
-            while flg.Value do
-                ggg.PrintOut( s, flg, prevLength, gatherOutputImpl, ms )
+            readFromMemoryStream( s, gatherOutputImpl, ms )
 
             // Switch from MemoryStream to StandardOut
             let std = new StreamWriter(Console.OpenStandardOutput())
