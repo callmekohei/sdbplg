@@ -35,7 +35,7 @@ module Foo =
 
         let tc = System.Environment.TickCount
         while flg.Value do
-            if System.Environment.TickCount - tc > 3000 then  /// 10s
+            if System.Environment.TickCount - tc > 3000 then  /// 3s
                 flg := false
             elif endMarks |> List.exists( fun endMark -> (str.Value).Contains(endMark) ) then
                 flg := false
